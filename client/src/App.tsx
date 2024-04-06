@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import { Main } from "./components/Main";
-import {History}  from "./components/History";
-function App() {
-  const [page, setPage] = useState("History");
 
+import Test from "./components/Test";
+
+function App() {
 
 
   return (
@@ -24,7 +22,7 @@ function App() {
       </div>
       {page === "Main" && <Main></Main>}
       {page === "History" && <History></History>}
-
+      
 
     </>
   );
