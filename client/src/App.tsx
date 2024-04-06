@@ -1,9 +1,13 @@
+import { useState } from "react";
 import "./App.css";
-
+import History from "./components/History";
+import Main from "./components/History";
 import Test from "./components/Test";
 
 function App() {
 
+
+const [page, setPage] = useState("Main");
 
   return (
     <>
@@ -22,8 +26,6 @@ function App() {
       </div>
       {page === "Main" && <Main></Main>}
       {page === "History" && <History></History>}
-      
-
     </>
   );
 }
