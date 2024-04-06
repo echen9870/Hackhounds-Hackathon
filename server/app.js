@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 
@@ -15,6 +16,9 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => {
   console.log("Connected to MongoDB");
 });
+
+app.use(express.json()); // Parse JSON request bodies
+app.use(cors());
 
 // Routes
 const orderRouter = require("./routes/orderRoutes.ts");
