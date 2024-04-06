@@ -27,6 +27,7 @@ const [page, setPage] = useState("Main");
       {page === "Main" && <Main></Main>}
       {page === "History" && <History></History>}
     </>
+    <Test></Test>
   );
 }
 
