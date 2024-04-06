@@ -47,26 +47,6 @@ router.get("/findOrderAfterDate/:date", async (req, res) => {
         },
       },
     ]);
-    console.log(aggregatedData);
-
-    //Aggregated pipeline for incoming orders
-    const aggregatedData2 = await Order.aggregate([
-      
-      //Filter orders that have arrived on or before targetDate
-      {
-        $match: {
-          arrival: { $lte: "2024-04-10T14:00:00.000Z" }
-      }
-      },
-      //Group order by incoming and outgoing
-      {
-        $group: {
-          _id: "$orderType",
-          total: { $sum: "$price" },
-        },
-      },
-    ]);
-    console.log(aggregatedData2);
 
     res.status(200).json(aggregatedData);
   } catch (error) {
