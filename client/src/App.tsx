@@ -10,6 +10,7 @@ function App() {
   return (
     <>
       <div id="header" style={styles.navBar}>
+        <ul>
         <button className="button" onClick={ () => {setPage("Main")}}>
           Main
         </button>
@@ -19,10 +20,11 @@ function App() {
         <button id="plus" className="button">
           +
         </button>
+        </ul>
       </div>
       {page === "Main" && <Main></Main>}
       {page === "History" && <History></History>}
-      
+
 
     </>
   );
