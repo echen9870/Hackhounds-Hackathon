@@ -106,8 +106,8 @@ router.get("/findStatsDate/:date", async (req, res) => {
               $cond: [
                 { $eq: ["$orderType", "in"] },
                 "$quantity",
-                { $subtract: [0, "$quantity"] } // Subtract quantity for outgoing orders
-              ]
+                { $subtract: [0, "$quantity"] }, // Subtract quantity for outgoing orders
+              ],
             },
           },
           totalProfit: {
@@ -173,21 +173,10 @@ router.post("/postOrder", async (req, res) => {
 });
 
 //PUT into an existing order
-router.put("/putOrder", async (req, res) => {
-  console.log(req.body);
-  const order = new Order({
-    orderId: req.body.orderType,
-    orderType: req.body.orderType,
-    ordered: req.body.ordered,
-    arrival: req.body.arrival,
-    product: req.body.product,
-    price: req.body.price,
-    quantity: req.body.quantity,
-  });
-
+router.put("/putOrder/:orderID", async (req, res) => {
   try {
     // Find the existing order by ID
-    const existingOrder = await Order.findById(order.orderId);
+    const existingOrder = await Order.findById(req.body._id);
     // If order doesn't exist
     if (!existingOrder) {
       return res.status(404).json({ message: "Order not found" });

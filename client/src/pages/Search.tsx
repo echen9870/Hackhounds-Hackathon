@@ -103,8 +103,9 @@ const OrderSearchInput = () => {
 
   return (
     <>
-      <div style={styles.navBar}>
+      <div className="flex flex-wrap justify-center items-center gap-2 p-4 bg-gray-200 rounded-lg">
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="text"
           name="orderType"
           placeholder="Order Type"
@@ -112,6 +113,7 @@ const OrderSearchInput = () => {
           onChange={handleChange}
         />
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="date"
           name="ordered"
           value={
@@ -122,6 +124,7 @@ const OrderSearchInput = () => {
           onChange={handleChange}
         />
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="date"
           name="arrival"
           value={
@@ -132,6 +135,7 @@ const OrderSearchInput = () => {
           onChange={handleChange}
         />
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="text"
           name="product"
           placeholder="Product"
@@ -139,6 +143,7 @@ const OrderSearchInput = () => {
           onChange={handleChange}
         />
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="text"
           name="quantity"
           placeholder="Quantity"
@@ -146,35 +151,28 @@ const OrderSearchInput = () => {
           onChange={handleChange}
         />
         <input
+          className="px-4 py-2 rounded-md bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
           type="text"
           name="price"
           placeholder="Price"
           value={searchQuery.price || ""}
           onChange={handleChange}
         />
-        <button type="button" onClick={onSubmit}>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+          type="button"
+          onClick={onSubmit}
+        >
           Search
         </button>
       </div>
-      <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {orderList.map((order) => (
-          <Card
-            key={order._id}
-            order={order}
-            handleDelete={handleDelete}
-          ></Card>
+          <Card key={order._id} order={order} handleDelete={handleDelete} />
         ))}
       </div>
     </>
   );
-};
-
-const styles = {
-  navBar: {
-    display: "flex" as 'flex',
-    flexDirection: "row" as 'row',
-    alignItems: "center" as 'center',
-  },
 };
 
 export default OrderSearchInput;

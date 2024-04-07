@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Order } from "../components/Order";
 import Form from "../components/Form";
 import Card from "../components/Card";
+import Table from "../components/Table";
 
 interface FormInput {
   orderType: string;
@@ -28,12 +29,14 @@ export const Main = () => {
   const [currentDate, setCurrentDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-
+  const [aggregatedData, setAggregatedData] = useState([]);
+  const [isHovered, setIsHovered] = useState(false);
   {
     /* useEffect hook to automatically update orders */
   }
   useEffect(() => {
     getOrders();
+    getStats();
   }, [currentDate]);
 
   {
@@ -57,6 +60,45 @@ export const Main = () => {
     }
   };
 
+  const getStats = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/orders/findStatsDate/${currentDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      setAggregatedData(data);
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUpdate = async (order:Order) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/orders/putOrder/${order._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(order),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
   {
     /*Delete functions that allow individual orders to be deleted */
   }
@@ -76,6 +118,7 @@ export const Main = () => {
     } catch (error) {
       console.error(error);
     }
+    getStats();
     getOrders();
   };
 
@@ -97,6 +140,7 @@ export const Main = () => {
       console.error(error);
     }
     setShowForm(false);
+    getStats();
     getOrders();
   };
 
@@ -105,39 +149,72 @@ export const Main = () => {
   };
 
   return (
-    <div style={styles.bigDiv}>
-      <div style={styles.inDiv}>
-        {orderList &&
-          orderList
-            .filter((order) => order.orderType === "in")
-            .map((order) => (
-              <Card key={order._id} order={order} handleDelete={handleDelete} />
+    <div className="flex flex-row h-screen ">
+      <div className="w-1/4 h-full p-4 pb-16 border-r border-gray-300 flex flex-col justify-center items-center rounded-lg">
+        <h1 className="text-xl font-bold mb-4">Incoming Stock</h1>
+        <div
+          className="overflow-hidden h-full pb-16 overflow-y-auto"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "transparent transparent",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.scrollbarColor = "auto auto")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.scrollbarColor = "transparent transparent")
+          }
+        >
+          {orderList &&
+            orderList
+              .filter((order) => order.orderType === "in")
+              .map((order, index) => (
+                <div key={order._id} className={`${index !== 0 ? "mt-2" : ""}`}>
+                  <Card handleUpdate = {handleUpdate} order={order} handleDelete={handleDelete} />
+                </div>
+              ))}
+        </div>
+      </div>
+      <div className="w-1/4 h-full p-4 pb-16 border-r border-gray-300 flex flex-col justify-center items-center rounded-lg">
+        <h1 className="text-xl font-bold mb-4">Outgoing Stock</h1>
+        <div
+          className="overflow-hidden h-full pb-16 overflow-y-auto"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "transparent transparent",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.scrollbarColor = "auto auto")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.scrollbarColor = "transparent transparent")
+          }
+        >
+          {orderList
+            .filter((order) => order.orderType === "out")
+            .map((order, index) => (
+              <div key={order._id} className={`${index !== 0 ? "mt-2" : ""}`}>
+                <Card order={order} handleUpdate = {handleUpdate} handleDelete={handleDelete} />
+              </div>
             ))}
+        </div>
       </div>
-      <div style={styles.outDiv}>
-        {orderList
-          .filter((order) => order.orderType === "out")
-          .map((order) => (
-            <Card
-              key={order._id}
-              order={order}
-              handleDelete={handleDelete}
-            ></Card>
-          ))}
-      </div>
-      <div style={styles.order}>
+      <div className="flex-grow flex-shrink-0 w-60 mx-4 my-2 p-4 ">
         <div>
           <button
             onClick={() => {
               setShowForm(true);
             }}
+            className="inline-block px-4 py-2 my-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Open Form
           </button>
+
           {showForm && (
-            <div style={styles.popup}>
-              <div style={styles.popupContent}>
+            <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center border-r border-gray-300 rounded-lg">
+              <div className="bg-white p-20 rounded-5 shadow-md">
                 <button
+                  className="inline-block px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   onClick={() => {
                     setShowForm(false);
                   }}
@@ -155,56 +232,13 @@ export const Main = () => {
           name="date"
           value={currentDate}
           onChange={handleDateChange}
+          className="appearance-none block w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
         />
+
+        <Table data={aggregatedData} />
       </div>
     </div>
   );
 };
 
 export default Main;
-
-interface Styles {
-  bigDiv: React.CSSProperties;
-  inDiv: React.CSSProperties;
-  outDiv: React.CSSProperties;
-  order: React.CSSProperties;
-  popup: React.CSSProperties;
-  popupContent: React.CSSProperties;
-}
-
-const styles: Styles = {
-  bigDiv: {
-    display: "flex",
-    flexDirection: "row",
-    height: "100vh", // Full height of the viewport
-  },
-  inDiv: {
-    flex: "1 0 20%", // Grow, but don't shrink, and start at 25% width
-    background: "lightblue", // Example background color
-  },
-  outDiv: {
-    flex: "1 0 20%", // Grow, but don't shrink, and start at 25% width
-    background: "lightgreen", // Example background color
-  },
-  order: {
-    flex: "2 0 60%", // Grow, but don't shrink, and start at 50% width
-    background: "lightcoral", // Example background color
-  },
-  popup: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  popupContent: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "5px",
-    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
-  },
-};
