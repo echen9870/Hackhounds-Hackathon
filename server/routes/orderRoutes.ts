@@ -26,14 +26,37 @@ router.get("/findOrderID/:id", async (req, res) => {
   }
 });
 
+//Get orders based on the query
+router.get("/findOrderByQuery", async (req, res) => {
+  const query = {
+    orderType: req.query.orderType ? String(req.query.orderType) : null,
+    ordered: req.query.ordered ? new Date(req.query.ordered) : null,
+    arrival: req.query.arrival ? new Date(req.query.arrival) : null,
+    product: req.query.product ? String(req.query.product) : null,
+    quantity: req.query.quantity ? Number(req.query.quantity) : null,
+    price: req.query.price ? Number(req.query.price) : null,
+  };
+  console.log(query);
+
+  // Remove null values from the query object
+  const filteredQuery = Object.fromEntries(
+    Object.entries(query).filter(([_, value]) => value !== null)
+  );
+
+  try {
+    // Query the database based on the filtered search criteria
+    const orders = await Order.find(filteredQuery);
+
+    // Send the response with the matching orders
+    res.status(200).json(orders);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 //GET all orders that are after targetDate
 router.get("/findOrderBeforeDate/:date", async (req, res) => {
   try {
-    const targetDate = new Date(req.params.date);
-    //Check if the data is already in the cache
-    //If data is in cache, just return cache
-    //Else use Aggregate Pipeline to grab necessary info
-    //Aggregated Pipeline for incoming orders
     const aggregatedData = await Order.aggregate([
       //Filter orders that have arrived on or before targetDate
       {
@@ -59,28 +82,17 @@ router.get("/findOrderBeforeDate/:date", async (req, res) => {
 
 //GET all orders that are after targetDate
 router.get("/findOrderAfterDate/:date", async (req, res) => {
+  const targetDate = new Date(req.params.date);
   try {
-    const targetDate = new Date(req.params.date);
-    //Check if the data is already in the cache
-    //If data is in cache, just return cache
-    //Else use Aggregate Pipeline to grab necessary info
     //Aggregated Pipeline for incoming orders
     const aggregatedData = await Order.aggregate([
       //Filter orders that have arrived on or before targetDate
       {
         $match: {
-          arrival: { $gte: req.params.date },
-        },
-      },
-      //Group order by incoming and outgoing
-      {
-        $group: {
-          _id: { orderType: "$orderType", Product: "$product" },
-          totalCost: { $sum: { $multiply: ["$price", "$quantity"] } },
+          arrival: { $gte: targetDate },
         },
       },
     ]);
-
     res.status(200).json(aggregatedData);
   } catch (error) {
     console.error(error);
@@ -90,7 +102,6 @@ router.get("/findOrderAfterDate/:date", async (req, res) => {
 
 // POST a new order
 router.post("/postOrder", async (req, res) => {
-  console.log(req.body);
   const order = new Order({
     orderType: req.body.orderType,
     ordered: req.body.ordered,
@@ -148,6 +159,25 @@ router.put("/putOrder", async (req, res) => {
   }
 });
 
+//Del an existing order by ID
 
+router.delete("/delOrder/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // Find the order by ID and delete it
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Order deleted successfully", deletedOrder });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;

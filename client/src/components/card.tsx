@@ -11,11 +11,20 @@ interface Order {
   price: number;
 }
 
-const Card: React.FC<{ order: Order }> = ({ order }) => {
+interface Props{
+  order: Order,
+  handleDelete: (id:string) => void;
+}
+const Card: React.FC<Props> = ( props) => {
+
+  const onDelete = () => {
+    props.handleDelete(order._id);
+  }
+  
+  const order = props.order
   // Parse ordered and arrival properties into Date objects
   const orderedDate = new Date(order.ordered);
   const arrivalDate = new Date(order.arrival);
-
   // Function to format date as MM-DD-YYYY
   const formatDate = (date: Date): string => {
     const month = date.getMonth() + 1; // Month is 0-indexed
@@ -32,6 +41,7 @@ const Card: React.FC<{ order: Order }> = ({ order }) => {
       <p>Product: {order.product}</p>
       <p>Quantity: {order.quantity}</p>
       <p>Price: ${order.price.toFixed(2)}</p>
+      <button onClick = {onDelete}>Delete</button>
     </div>
   );
 };

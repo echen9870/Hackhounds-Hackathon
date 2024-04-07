@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Order } from "../components/Order";
 import Form from "../components/Form";
 import Card from "../components/Card";
@@ -60,10 +60,31 @@ export const Main = () => {
   };
 
   {
+    /*Delete functions that allow individual orders to be deleted */
+  }
+  const handleDelete = async (_id: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/orders/delOrder/${_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log(data.message);
+    } catch (error) {
+      console.error(error);
+    }
+    getOrders();
+  };
+
+  {
     /* This function is passed to the Form component, and whenever an order is submitted this function is called */
   }
   const handleOnSubmit = async (formData: FormInput) => {
-    console.log(formData);
     try {
       const response = await fetch("http://localhost:3000/orders/postOrder", {
         method: "POST",
@@ -77,6 +98,8 @@ export const Main = () => {
     } catch (error) {
       console.error(error);
     }
+    setShowForm(false);
+    getOrders();
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,14 +112,14 @@ export const Main = () => {
         {orderList
           .filter((order) => order.orderType === "in")
           .map((order) => (
-            <Card order={order}></Card>
+            <Card order={order} handleDelete={handleDelete}></Card>
           ))}
       </div>
       <div style={styles.outDiv}>
         {orderList
           .filter((order) => order.orderType === "out")
           .map((order) => (
-            <Card order={order}></Card>
+            <Card order={order} handleDelete={handleDelete}></Card>
           ))}
       </div>
       <div style={styles.order}>

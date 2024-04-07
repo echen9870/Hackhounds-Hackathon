@@ -1,12 +1,14 @@
 import { useState } from "react";
-import History from "./pages/History";
+import Search from "./pages/Search";
 import Main from "./pages/Main";
+
+
 
 const styles = {
   container: {
-    display: "flex",
-    flexDirection: "column", // Arrange children vertically
-    height: "100vh",
+    display: "flex" as 'flex',
+    flexDirection: "column" as 'column', // Arrange children vertically
+    height: "100vh" as '100vh',
     width: "100vw", // Full height of the viewport
   },
   navBar: {
@@ -26,8 +28,8 @@ function App() {
         <button className="button" onClick={ () => setPage("Main")}>
           Main
         </button>
-        <button className="button" onClick={() => setPage("History")}>
-          History
+        <button className="button" onClick={() => setPage("Search")}>
+        Search
         </button>
         <button id="plus" className="button">
           +
@@ -35,7 +37,7 @@ function App() {
       </div>
       <div style = {styles.mainScreen}>
       {page === "Main" && <Main />}
-      {page === "History" && <History />}
+      {page === "Search" && <Search />}
       </div>
       
       </div>
