@@ -45,7 +45,7 @@ const Card: React.FC<Props> = (props) => {
   };
 
   return (
-    <div className="p-4 border rounded-lg shadow-md bg-gray-100">
+    <div className="p-4 border rounded-lg shadow-md bg-gray-100 flex flex-col">
       <p className="mb-1">ID: {order._id}</p>
       {isEditing ? (
         <>
@@ -94,28 +94,30 @@ const Card: React.FC<Props> = (props) => {
         </>
       )}
 
-      <button
-        className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2 ${
-          isEditing ? "hidden" : ""
-        }`}
-        onClick={() => setIsEditing(true)}
-      >
-        Update
-      </button>
-      <button
-        className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2 ${
-          isEditing ? "" : "hidden"
-        }`}
-        onClick={onUpdate}
-      >
-        Save
-      </button>
-      <button
-        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        onClick={onDelete}
-      >
-        Delete
-      </button>
+      <div className="flex">
+        <button
+          className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2 ${
+            isEditing ? "hidden" : ""
+          }`}
+          onClick={() => setIsEditing(true)}
+        >
+          Update
+        </button>
+        <button
+          className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2 ${
+            isEditing ? "" : "hidden"
+          }`}
+          onClick={onUpdate}
+        >
+          Save
+        </button>
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          onClick={onDelete}
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 };

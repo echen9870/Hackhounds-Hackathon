@@ -44,7 +44,24 @@ const OrderSearchInput = () => {
           : value,
     }));
   };
-
+  const handleUpdate = async (order:Order) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/orders/putOrder/${order._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(order),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const onSubmit = async () => {
     try {
       const queryString = new URLSearchParams({
@@ -168,7 +185,7 @@ const OrderSearchInput = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {orderList.map((order) => (
-          <Card key={order._id} order={order} handleDelete={handleDelete} />
+          <Card handleUpdate = {handleUpdate} key={order._id} order={order} handleDelete={handleDelete} />
         ))}
       </div>
     </>
