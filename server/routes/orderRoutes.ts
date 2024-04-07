@@ -26,6 +26,7 @@ router.get("/findOrderID/:id", async (req, res) => {
   }
 });
 
+//Get order by search query
 router.get("/findOrderByQuery", async (req, res) => {
   const orderedDateString = req.query.ordered;
   const arrivalDateString = req.query.arrival;
@@ -34,26 +35,26 @@ router.get("/findOrderByQuery", async (req, res) => {
   let arrival = null;
 
   // Convert ordered date string to Date object if it's not empty
-  if (orderedDateString !== '') {
+  if (orderedDateString !== "") {
     const orderedDate = new Date(orderedDateString);
     const year = orderedDate.getFullYear();
     const month = orderedDate.getMonth();
     const day = orderedDate.getDate();
     ordered = {
       $gte: new Date(year, month, day + 1), // Start of the day
-      $lt: new Date(year, month, day + 2) // Start of the next day
+      $lt: new Date(year, month, day + 2), // Start of the next day
     };
   }
 
   // Convert arrival date string to Date object if it's not empty
-  if (arrivalDateString !== '') {
+  if (arrivalDateString !== "") {
     const arrivalDate = new Date(arrivalDateString);
     const year = arrivalDate.getFullYear();
     const month = arrivalDate.getMonth();
     const day = arrivalDate.getDate();
     arrival = {
       $gte: new Date(year, month, day + 1), // Start of the day
-      $lt: new Date(year, month, day + 2) // Start of the next day
+      $lt: new Date(year, month, day + 2), // Start of the next day
     };
   }
 
@@ -84,26 +85,44 @@ router.get("/findOrderByQuery", async (req, res) => {
   }
 });
 
-
 //GET all orders that are after targetDate
-router.get("/findOrderBeforeDate/:date", async (req, res) => {
+router.get("/findStatsDate/:date", async (req, res) => {
+  console.log(req.params.date);
+  const targetDate = new Date(req.params.date);
   try {
     const aggregatedData = await Order.aggregate([
       //Filter orders that have arrived on or before targetDate
       {
         $match: {
-          arrival: { $lte: req.params.date },
+          arrival: { $lte: targetDate },
         },
       },
       //Group order by incoming and outgoing
       {
         $group: {
-          _id: { orderType: "$orderType", Product: "$product" },
-          totalCost: { $sum: { $multiply: ["$price", "$quantity"] } },
+          _id: { Product: "$product" },
+          totalQuantity: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orderType", "in"] },
+                "$quantity",
+                { $subtract: [0, "$quantity"] } // Subtract quantity for outgoing orders
+              ]
+            },
+          },
+          totalProfit: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orderType", "out"] },
+                { $multiply: ["$price", "$quantity"] },
+                { $multiply: ["$price", "$quantity", -1] }, // Outgoing orders contribute to negative profit
+              ],
+            },
+          },
         },
       },
     ]);
-
+    console.log(aggregatedData);
     res.status(200).json(aggregatedData);
   } catch (error) {
     console.error(error);
