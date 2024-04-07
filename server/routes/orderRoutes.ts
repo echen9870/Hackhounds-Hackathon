@@ -26,23 +26,53 @@ router.get("/findOrderID/:id", async (req, res) => {
   }
 });
 
-//Get orders based on the query
 router.get("/findOrderByQuery", async (req, res) => {
-  const query = {
-    orderType: req.query.orderType ? String(req.query.orderType) : null,
-    ordered: req.query.ordered ? new Date(req.query.ordered) : null,
-    arrival: req.query.arrival ? new Date(req.query.arrival) : null,
-    product: req.query.product ? String(req.query.product) : null,
-    quantity: req.query.quantity ? Number(req.query.quantity) : null,
-    price: req.query.price ? Number(req.query.price) : null,
-  };
-  console.log(query);
+  const orderedDateString = req.query.ordered;
+  const arrivalDateString = req.query.arrival;
 
-  // Remove null values from the query object
+  let ordered = null;
+  let arrival = null;
+
+  // Convert ordered date string to Date object if it's not empty
+  if (orderedDateString !== '') {
+    const orderedDate = new Date(orderedDateString);
+    const year = orderedDate.getFullYear();
+    const month = orderedDate.getMonth();
+    const day = orderedDate.getDate();
+    ordered = {
+      $gte: new Date(year, month, day + 1), // Start of the day
+      $lt: new Date(year, month, day + 2) // Start of the next day
+    };
+  }
+
+  // Convert arrival date string to Date object if it's not empty
+  if (arrivalDateString !== '') {
+    const arrivalDate = new Date(arrivalDateString);
+    const year = arrivalDate.getFullYear();
+    const month = arrivalDate.getMonth();
+    const day = arrivalDate.getDate();
+    arrival = {
+      $gte: new Date(year, month, day + 1), // Start of the day
+      $lt: new Date(year, month, day + 2) // Start of the next day
+    };
+  }
+
+  // Construct the query object
+  const query = {
+    orderType: req.query.orderType ? req.query.orderType : null,
+    ordered: ordered,
+    arrival: arrival,
+    product: req.query.product,
+    quantity: req.query.quantity,
+    price: req.query.price,
+  };
+
+  // Remove null values and empty strings from the query object
   const filteredQuery = Object.fromEntries(
-    Object.entries(query).filter(([_, value]) => value !== null)
+    Object.entries(query).filter(([_, value]) => value !== null && value !== "")
   );
 
+  console.log(filteredQuery);
   try {
     // Query the database based on the filtered search criteria
     const orders = await Order.find(filteredQuery);
@@ -53,6 +83,7 @@ router.get("/findOrderByQuery", async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 //GET all orders that are after targetDate
 router.get("/findOrderBeforeDate/:date", async (req, res) => {
@@ -104,8 +135,8 @@ router.get("/findOrderAfterDate/:date", async (req, res) => {
 router.post("/postOrder", async (req, res) => {
   const order = new Order({
     orderType: req.body.orderType,
-    ordered: req.body.ordered,
-    arrival: req.body.arrival,
+    ordered: new Date(req.body.ordered),
+    arrival: new Date(req.body.arrival),
     product: req.body.product,
     price: req.body.price,
     quantity: req.body.quantity,

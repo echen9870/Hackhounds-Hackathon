@@ -40,7 +40,6 @@ export const Main = () => {
     /*This function is called when we first load in, when date changes, and when a form is submitted*/
   }
   const getOrders = async () => {
-    console.log(currentDate);
     try {
       const response = await fetch(
         `http://localhost:3000/orders/findOrderAfterDate/${currentDate}`,
@@ -53,7 +52,6 @@ export const Main = () => {
       );
       const data = await response.json();
       setOrderList(data);
-      console.log(data);
     } catch (error) {
       console.error(error);
     }
@@ -109,17 +107,22 @@ export const Main = () => {
   return (
     <div style={styles.bigDiv}>
       <div style={styles.inDiv}>
-        {orderList
-          .filter((order) => order.orderType === "in")
-          .map((order) => (
-            <Card order={order} handleDelete={handleDelete}></Card>
-          ))}
+        {orderList &&
+          orderList
+            .filter((order) => order.orderType === "in")
+            .map((order) => (
+              <Card key={order._id} order={order} handleDelete={handleDelete} />
+            ))}
       </div>
       <div style={styles.outDiv}>
         {orderList
           .filter((order) => order.orderType === "out")
           .map((order) => (
-            <Card order={order} handleDelete={handleDelete}></Card>
+            <Card
+              key={order._id}
+              order={order}
+              handleDelete={handleDelete}
+            ></Card>
           ))}
       </div>
       <div style={styles.order}>

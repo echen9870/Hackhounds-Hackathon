@@ -1,5 +1,6 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import Card from "../components/Card";
+
 interface OrderSearchQuery {
   orderType: string | null;
   ordered: Date | null;
@@ -35,24 +36,26 @@ const OrderSearchInput = () => {
     const { name, value } = e.target;
     setSearchQuery((prevSearchQuery) => ({
       ...prevSearchQuery,
-      [name]: value,
+      [name]:
+        name === "ordered" || name === "arrival"
+          ? value
+            ? new Date(value)
+            : null
+          : value,
     }));
   };
 
   const onSubmit = async () => {
-    console.log(searchQuery);
     try {
-      // Construct the query string
       const queryString = new URLSearchParams({
         orderType: searchQuery.orderType || "",
-        ordered: searchQuery.ordered || "",
+        ordered: searchQuery.ordered ? searchQuery.ordered.toISOString() : "",
         arrival: searchQuery.arrival ? searchQuery.arrival.toISOString() : "",
         product: searchQuery.product || "",
         quantity: searchQuery.quantity ? String(searchQuery.quantity) : "",
         price: searchQuery.price ? String(searchQuery.price) : "",
       }).toString();
-      console.log(queryString);
-      // Make the GET request to the backend API
+
       const response = await fetch(
         `http://localhost:3000/orders/findOrderByQuery?${queryString}`,
         {
@@ -63,11 +66,11 @@ const OrderSearchInput = () => {
         }
       );
 
-      // Parse the JSON response
-      const orders = await response.json();
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-      // Handle the response data (e.g., update state)
-      console.log(orders);
+      const orders = await response.json();
       setOrderList(orders);
     } catch (error) {
       console.error(error);
@@ -85,6 +88,11 @@ const OrderSearchInput = () => {
           },
         }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete order");
+      }
+
       const data = await response.json();
       console.log(data.message);
     } catch (error) {
@@ -106,15 +114,21 @@ const OrderSearchInput = () => {
         <input
           type="date"
           name="ordered"
-          placeholder="Ordered Date"
-          value={searchQuery.ordered}
+          value={
+            searchQuery.ordered
+              ? searchQuery.ordered.toISOString().split("T")[0]
+              : ""
+          }
           onChange={handleChange}
         />
         <input
           type="date"
           name="arrival"
-          placeholder="Arrival Date"
-          value={searchQuery.arrival}
+          value={
+            searchQuery.arrival
+              ? searchQuery.arrival.toISOString().split("T")[0]
+              : ""
+          }
           onChange={handleChange}
         />
         <input
@@ -138,25 +152,29 @@ const OrderSearchInput = () => {
           value={searchQuery.price || ""}
           onChange={handleChange}
         />
-        <button type="submit" onClick={onSubmit}>
+        <button type="button" onClick={onSubmit}>
           Search
         </button>
       </div>
-
       <div>
-        {orderList
-          .map((order) => (
-            <Card order={order} handleDelete={handleDelete}></Card>
-          ))}
+        {orderList.map((order) => (
+          <Card
+            key={order._id}
+            order={order}
+            handleDelete={handleDelete}
+          ></Card>
+        ))}
       </div>
     </>
   );
 };
+
 const styles = {
   navBar: {
-    display: "flex" as "flex",
-    flexDirection: "row" as "row",
-    alignItems: "center" as "center",
+    display: "flex" as 'flex',
+    flexDirection: "row" as 'row',
+    alignItems: "center" as 'center',
   },
 };
+
 export default OrderSearchInput;

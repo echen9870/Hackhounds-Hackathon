@@ -58,7 +58,7 @@ interface Props {
           type="date"
           id="ordered"
           name="ordered"
-          value={formData.ordered.toISOString().split('T')[0]}
+          value={formData.ordered.toString()}
           onChange={handleChange}
           required
         />
@@ -69,7 +69,7 @@ interface Props {
           type="date"
           id="arrival"
           name="arrival"
-          value={formData.ordered.toISOString().split('T')[0]}
+          value={formData.arrival.toString()}
           onChange={handleChange}
           required
         />
